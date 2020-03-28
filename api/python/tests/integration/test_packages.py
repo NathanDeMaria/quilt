@@ -370,11 +370,11 @@ class PackageTest(QuiltTestCase):
         pkg['bar'].meta['target'] = 'unicode'
 
         with open(DATA_DIR / 'foo.txt') as fd:
-            assert fd.read().replace('\n', '') == '123'
+            assert fd.read().strip() == '123'
         # Copy foo.text to bar.txt
         pkg['foo'].fetch('data/bar.txt')
         with open('data/bar.txt') as fd:
-            assert fd.read().replace('\n', '') == '123'
+            assert fd.read().strip() == '123'
 
         # Raise an error if you copy to yourself.
         with pytest.raises(shutil.SameFileError):
@@ -544,10 +544,10 @@ class PackageTest(QuiltTestCase):
             .set('baz', DATA_DIR / 'foo.txt')
         )
         pkg.build('foo/bar')
-
         pkg['foo'].meta['target'] = 'unicode'
-        assert pkg['foo'].deserialize() == '123\n'
-        assert pkg['baz'].deserialize() == '123\n'
+        expected = '123{}'.format(os.linesep)
+        assert pkg['foo'].deserialize() == expected
+        assert pkg['baz'].deserialize() == expected
 
         with pytest.raises(QuiltException):
             pkg['bar'].deserialize()
@@ -840,8 +840,9 @@ class PackageTest(QuiltTestCase):
 
         pkg.build("Quilt/Test")
 
-        assert pkg['foo'].deserialize() == '123\n'
-        assert pkg['foo']() == '123\n'
+        expected = '123{}'.format(os.linesep)
+        assert pkg['foo'].deserialize() == expected
+        assert pkg['foo']() == expected
 
         with pytest.raises(KeyError):
             pkg['baz']
@@ -1348,7 +1349,7 @@ class PackageTest(QuiltTestCase):
         path = pathlib.Path.cwd() / dest / 'bat'
         mocked_cache_set.assert_called_once_with(
             entry_url,
-            str(path),
+            PhysicalKey.from_path(path).path,
         )
         assert path.read_bytes() == entry_content
 
@@ -1372,7 +1373,7 @@ class PackageTest(QuiltTestCase):
         path = pathlib.Path.cwd() / dest / 'bat'
         mocked_cache_set.assert_called_once_with(
             entry_url,
-            str(path),
+            PhysicalKey.from_path(path).path,
         )
         assert path.read_bytes() == entry_content
 
