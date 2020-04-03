@@ -1,0 +1,3 @@
+api/python/tests/data/*.csv text eol=lf
+api/python/tests/data/dir/foo.txt text eol=lf
+api/python/tests/data/dir/x/blah.txt text eol=lf
